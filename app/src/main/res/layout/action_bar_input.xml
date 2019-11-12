@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_marginLeft="-10dp"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <EditText
+        android:id="@+id/edt_action_bar"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:textSize="14sp"
+        android:hint="输入 URL 或扫码填入"
+        android:textCursorDrawable="@color/colorPrimaryDark"
+        android:backgroundTint="@color/colorPrimaryDark"
+        android:drawableBottom="@color/colorPrimaryDark"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintWidth_percent="0.7"
+        />
+
+
+    <TextView
+        android:id="@+id/tv_action_bar"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="更换"
+        android:paddingRight="20dp"
+        android:textColor="#3F51B5"
+        android:textSize="18sp"
+        app:layout_constraintLeft_toRightOf="@+id/edt_action_bar"
+        app:layout_constraintWidth_default="wrap"
+        app:layout_constraintWidth_percent="0.1" />
+
+    <ImageView
+        android:id="@+id/scan_action_bar"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:src="@mipmap/scan"
+        app:layout_constraintLeft_toRightOf="@+id/tv_action_bar"
+        app:layout_constraintWidth_percent="0.07"
+        tools:layout_editor_absoluteY="7dp" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

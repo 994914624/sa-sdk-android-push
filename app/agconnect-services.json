@@ -1,0 +1,11 @@
+{
+	"client":{
+		"cp_id":"890086000102043408",
+		"product_id":"9105385871707925264",
+		"client_id":"225876812574491840",
+		"client_secret":"4588A1B1E97CE217660CC10552B58BAC74574C665C4A2E42E4BE142A9F3F409D",
+		"app_id":"100994021",
+		"package_name":"com.sensorsdata.android.push"
+	},
+	"configuration_version":"1.0"
+}
