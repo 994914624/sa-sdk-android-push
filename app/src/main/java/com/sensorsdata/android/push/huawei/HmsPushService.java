@@ -6,11 +6,8 @@ import android.util.Log;
 import com.huawei.hms.push.HmsMessageService;
 import com.huawei.hms.push.RemoteMessage;
 import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
-import com.sensorsdata.android.push.SFConstant;
-import com.sensorsdata.android.push.SFUtils;
 import com.sensorsdata.android.push.yzk.ToolBox;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -35,6 +32,7 @@ public class HmsPushService extends HmsMessageService {
             try {
                 ToolBox.HUAWEI_PUSH_ID = token;
                 SensorsDataAPI.sharedInstance().profileSet(new JSONObject().put("huawei_id",token));
+                SensorsDataAPI.sharedInstance().flush();
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -18,13 +18,14 @@ import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.huawei.hms.aaid.HmsInstanceId;
 import com.igexin.sdk.PushManager;
 import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
-import com.sensorsdata.android.push.MainActivity;
+import com.sensorsdata.android.push.HandlePushActivity;
 import com.sensorsdata.android.push.R;
 import com.umeng.message.PushAgent;
 import com.xiaomi.mipush.sdk.MiPushClient;
@@ -44,12 +45,15 @@ import java.util.Set;
 
 import cn.jpush.android.api.JPushInterface;
 
+
 /**
  * Created by yzk on 2019-10-30
+ * 工具箱
  */
 
 public class ToolBox {
 
+    // 临时保存华为推送 ID
     public static String HUAWEI_PUSH_ID = "";
 
     /**
@@ -57,14 +61,14 @@ public class ToolBox {
      */
     public static void requestPermission(Activity context) {
         // 申请 READ_PHONE_STATE 权限
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ActivityCompat.checkSelfPermission(context, "android.permission.WRITE_EXTERNAL_STORAGE") != PackageManager.PERMISSION_GRANTED) {
-                int code = (int) (Math.random()*1000+11);
-                ActivityCompat.requestPermissions(context, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE","android.permission.READ_PHONE_STATE"}, code);
+                int code = (int) (Math.random() * 1000 + 11);
+                ActivityCompat.requestPermissions(context, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_PHONE_STATE"}, code);
             }
             if (ActivityCompat.checkSelfPermission(context, "android.permission.READ_PHONE_STATE") != PackageManager.PERMISSION_GRANTED) {
-                int code = (int) (Math.random()*1000+111);
-                ActivityCompat.requestPermissions(context, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE","android.permission.READ_PHONE_STATE"}, code);
+                int code = (int) (Math.random() * 1000 + 111);
+                ActivityCompat.requestPermissions(context, new String[]{"android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_PHONE_STATE"}, code);
             }
         }
     }
@@ -89,14 +93,17 @@ public class ToolBox {
                     Toast.makeText(activity, "扫码取消", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(activity, "扫码成功： " + result.getContents(), Toast.LENGTH_LONG).show();
-                    SensorsDataAPI.sharedInstance().track("ScanBarOk");
                     // TODO 开启 debug 模式、点击图、可视化埋点
-                    if (!openDebugModeOrHeatMap(result.getContents(), activity)) {
+                    String url = result.getContents();
+                    if (!openDebugModeOrHeatMap(url, activity)) {
                         // TODO 更新数据接收地址 & 复制到剪切板 & 上报推送 ID
-                        updateServerUrl(result.getContents());
-                        runText.setText(String.format("当前数据接收地址：%s", getServerUrl()));
-                        copy(result.getContents(), activity);
-                        profilePushId(activity);
+                        if (url.contains("https://") || url.contains("http://")) {
+                            updateServerUrl(url);
+                            runText.setText(String.format("当前数据接收地址：%s", getServerUrl()));
+                            copy(result.getContents(), activity);
+                            profilePushId(activity);
+                            SensorsDataAPI.sharedInstance().track("ScanBarServerUrl");
+                        }
                     }
                 }
             }
@@ -131,6 +138,7 @@ public class ToolBox {
                 // 打开指定的 App
                 activity.startActivity(intent);
                 activity.finish();
+                SensorsDataAPI.sharedInstance().track("ScanBarDebug");
                 return true;
             }
             // 可视化埋点、点击图
@@ -152,6 +160,7 @@ public class ToolBox {
                 // 打开指定的 App
                 activity.startActivity(intent);
                 activity.finish();
+                SensorsDataAPI.sharedInstance().track("ScanBarHeatMap");
                 return true;
             }
         } catch (Exception e) {
@@ -180,8 +189,8 @@ public class ToolBox {
     /**
      * 更换数据接收地址
      */
-    public static void updateServerUrl(String serverUrl){
-        if(!TextUtils.isEmpty(serverUrl)){
+    public static void updateServerUrl(String serverUrl) {
+        if (!TextUtils.isEmpty(serverUrl)) {
             SensorsDataAPI.sharedInstance().setServerUrl(serverUrl);
         }
     }
@@ -243,7 +252,7 @@ public class ToolBox {
                 String sfData = null;
                 if (notificationExtras instanceof String) {
                     sfData = new JSONObject((String) notificationExtras).optString("sf_data");
-                } else if (notificationExtras instanceof Map){
+                } else if (notificationExtras instanceof Map) {
                     sfData = new JSONObject((Map) notificationExtras).optString("sf_data");
                 }
                 if (!TextUtils.isEmpty(sfData)) {
@@ -251,7 +260,7 @@ public class ToolBox {
                     // 推送消息中 SF 的内容
                     properties.put("$sf_msg_id", sfJson.optString("sf_msg_id", null));
                     properties.put("$sf_plan_id", sfJson.optString("sf_plan_id", null));
-                    if(!"null".equals(sfJson.optString("sf_audience_id", null))){
+                    if (!"null".equals(sfJson.optString("sf_audience_id", null))) {
                         properties.put("$sf_audience_id", sfJson.optString("sf_audience_id", null));
                     }
                     properties.put("$sf_link_url", sfJson.optString("sf_link_url", null));
@@ -277,7 +286,8 @@ public class ToolBox {
     }
 
     /*
-     * 反射调用 getServerUrl
+     * 反射调用 SDK getServerUrl
+     * 获取当前数据接收地址
      */
     public static String getServerUrl() {
         try {
@@ -286,7 +296,7 @@ public class ToolBox {
             java.lang.reflect.Method getServerUrl = clazz.getDeclaredMethod("getServerUrl");
             getServerUrl.setAccessible(true);
             Object sdkInstance = sharedInstance.invoke(null);
-            return (String)getServerUrl.invoke(sdkInstance);
+            return (String) getServerUrl.invoke(sdkInstance);
         } catch (Exception e) {
             e.printStackTrace();
             return "";
@@ -295,20 +305,23 @@ public class ToolBox {
 
     /**
      * 个推发送的是透传的消息
-     *  展示一个本地通知
+     * 展示一个本地通知
      */
-    public static void sendNotification(Context context) {
+    public static void sendNotification(Context context, String sf_data) {
         String channelID = "100";
         // 获取 NotificationManager 实例
         NotificationManager notifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notifyManager == null) return;
         // 获取 PendingIntent
         Intent intent = new Intent();
-        intent.setClass(context, MainActivity.class);
+        intent.setClass(context, HandlePushActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("title", "SF 发的是个推透传消息，无法展示标题");
+        intent.putExtra("content",  "SF 发的是个推透传消息，无法展示内容");
+        intent.putExtra("sf_data", sf_data );
         PendingIntent mainPendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         // 实例化NotificationCompat.Builde并设置相关属性
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context,channelID)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelID)
                 // 设置小图标
                 .setSmallIcon(R.mipmap.ic_launcher)
                 // 设置通知标题
@@ -317,9 +330,11 @@ public class ToolBox {
                 .setAutoCancel(true)
                 // 设置通知内容
                 .setContentText("xxx 内容")
+                // 锁屏可见
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(mainPendingIntent);
 
-        if(Build.VERSION.SDK_INT >= 26){
+        if (Build.VERSION.SDK_INT >= 26) {
             NotificationChannel channel = new NotificationChannel(channelID, "channel_name", android.app.NotificationManager.IMPORTANCE_HIGH);
             channel.setDescription("我是一个通知通道");
             notifyManager.createNotificationChannel(channel);
@@ -329,21 +344,47 @@ public class ToolBox {
     }
 
     /**
+     * 通知的开关是否打开
+     */
+    public static boolean isNotificationOpen(Context context) {
+        if (context == null) return false;
+        try {
+            return NotificationManagerCompat.from(context).areNotificationsEnabled();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 上报通知开关状态到用户表
+     */
+    public static void profilePushToggleStatus(Context context) {
+        if (null == context) return;
+        try {
+            SensorsDataAPI.sharedInstance().profileSet(new JSONObject().put("isNotificationOpen", "" + isNotificationOpen(context)));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * 华为 push
      */
     public static void getHuaWeiPushToken(final Context context) {
-        if(context ==null)return;
-        final HmsInstanceId hmsInstanceId  = HmsInstanceId.getInstance(context);
+        if (context == null) return;
+        final HmsInstanceId hmsInstanceId = HmsInstanceId.getInstance(context);
         new Thread() {
             @Override
             public void run() {
                 try {
-                    String token =  hmsInstanceId.getToken("com.sensorsdata.android.push", "HCM");
+                    String token = hmsInstanceId.getToken("com.sensorsdata.android.push", "HCM");
                     if (!TextUtils.isEmpty(token)) {
                         // getToken
                         HUAWEI_PUSH_ID = token;
-                        Log.i("华为推送 token: ",token);
-                        SensorsDataAPI.sharedInstance().profileSet(new JSONObject().put("huawei_id",token));
+                        Log.i("华为推送 token: ", token);
+                        SensorsDataAPI.sharedInstance().profileSet(new JSONObject().put("huawei_id", token));
+                        SensorsDataAPI.sharedInstance().flush();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -354,7 +395,6 @@ public class ToolBox {
 
     /**
      * post 请求
-     *
      */
     public static String submitPostData(String strUrlPath, String params) {
         try {
@@ -397,4 +437,26 @@ public class ToolBox {
         }
         return "-1";
     }
+
+    /**
+     * 统一处理通知消息
+     *
+     * @param title   推送消息标题
+     * @param content 推送消息内容
+     * @param sf_data 推送消息 sf_data
+     */
+    public static void handlePush(String title, String content, String sf_data, Context context) {
+        try {
+            Intent intent = new Intent(context, HandlePushActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("title", title + "");
+            intent.putExtra("content", content + "");
+            intent.putExtra("sf_data", sf_data );
+            context.startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }

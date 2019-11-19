@@ -24,6 +24,9 @@ import com.sensorsdata.android.push.SFLogger;
 import com.sensorsdata.android.push.SFUtils;
 import com.sensorsdata.android.push.yzk.ToolBox;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import cn.jpush.android.api.CmdMessage;
 import cn.jpush.android.api.CustomMessage;
 import cn.jpush.android.api.JPushMessage;
@@ -71,6 +74,9 @@ public class MyJPushMessageReceiver extends JPushMessageReceiver {
         super.onMessage(context, customMessage);
     }
 
+    /**
+     * 打开极光通知
+     */
     @Override
     public void onNotifyMessageOpened(Context context, NotificationMessage message) {
         SFLogger.d(TAG, "onNotifyMessageOpened");
@@ -82,8 +88,16 @@ public class MyJPushMessageReceiver extends JPushMessageReceiver {
          */
         //SFUtils.trackAppOpenNotification(context, SFUtils.readSFConfig(notificationMessage.notificationExtras), String.valueOf(notificationMessage.notificationId), notificationMessage.notificationTitle, notificationMessage.notificationContent);
         //SFUtils.handleSFConfig(context, SFUtils.readSFConfig(notificationMessage.notificationExtras));
-        SFUtils.sendBroadcast(context.getApplicationContext(), SFConstant.PUSH_CONTENT, message.toString());
-        ToolBox.trackAppOpenNotification(message.notificationExtras, message.notificationTitle, message.notificationContent);
+//        SFUtils.sendBroadcast(context.getApplicationContext(), SFConstant.PUSH_CONTENT, message.toString());
+//        ToolBox.trackAppOpenNotification(message.notificationExtras, message.notificationTitle, message.notificationContent);
+        // 处理通知
+        try {
+            String sf_data = new JSONObject(message.notificationExtras).optString("sf_data");
+            ToolBox.handlePush(message.notificationTitle,message.notificationContent,sf_data,context);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override

@@ -46,13 +46,15 @@ public class GeTuiService extends GTIntentService {
         SFUtils.savePushId(context, SFConstant.PUSH_ID_GETUI, clientId);
     }
 
+    /**
+     * 处理透传消息
+     */
     @Override
     public void onReceiveMessageData(Context context, GTTransmitMessage gtTransmitMessage) {
         if(context ==null || gtTransmitMessage ==null)return;
-        Log.i(TAG, "onNotificationMessageArrived");
+        Log.i(TAG, "onReceiveMessageData");
 
-        // 构造一个本地通知
-        ToolBox.sendNotification(context);
+
         /*
          * 透传消息的处理，此处仅仅演示了 sf_data 推送的相关字段，注意，如果你有原有的逻辑也有相关处理
          * 的逻辑，你需要做一定的兼容处理。
@@ -74,6 +76,10 @@ public class GeTuiService extends GTIntentService {
          * 透传的消息在 payload 中，目前调试来看，onNotificationMessageClicked 触发后才走的当前回调
          */
         String sfData = new String(payload);
+        // 构造一个本地通知
+        ToolBox.sendNotification(context,sfData);
+
+
         if (isNotificationClick) {
             isNotificationClick = false;
             SFUtils.trackAppOpenNotification(context, sfData, messageid, title, content);
@@ -108,6 +114,9 @@ public class GeTuiService extends GTIntentService {
                 + "\ntitle = " + gtNotificationMessage.getTitle());
     }
 
+    /**
+     * 通知，点击通知消息。个推的通知不能携带自定义参数。。。
+     */
     @Override
     public void onNotificationMessageClicked(Context context, GTNotificationMessage gtNotificationMessage) {
         Log.i(TAG, "onNotificationMessageClicked:"

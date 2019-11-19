@@ -11,8 +11,8 @@ android {
         applicationId "com.sensorsdata.android.push"
         minSdkVersion 17
         targetSdkVersion 29
-        versionCode 4
-        versionName "1.0.4"
+        versionCode 5
+        versionName "1.0.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
                 GETUI_APP_ID : "APP_ID",
@@ -67,6 +67,8 @@ dependencies {
     // 华为推送
     implementation 'com.huawei.agconnect:agconnect-core:1.0.0.300'
     implementation 'com.huawei.hms:push:3.0.0.303'
+    //
+    implementation 'com.yuyh.json:jsonviewer:1.0.6'
 }
 
 

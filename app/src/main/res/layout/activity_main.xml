@@ -42,6 +42,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
+                    android:id="@+id/tv_jpush_tip"
                     android:text="点击可复制极光推送 ID"
                     android:textColor="#000000" />
 
@@ -71,6 +72,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
+                    android:id="@+id/tv_getui_tip"
                     android:text="点击可复制个推推送 ID"
                     android:textColor="#000000" />
 
@@ -99,6 +101,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
+                    android:id="@+id/tv_umeng_tip"
                     android:text="点击可复制友盟推送 ID"
                     android:textColor="#000000" />
 
@@ -127,6 +130,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
+                    android:id="@+id/tv_xiaomi_tip"
                     android:text="点击可复制小米推送 ID"
                     android:textColor="#000000" />
 
@@ -156,6 +160,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
+                    android:id="@+id/tv_huawei_tip"
                     android:text="点击可复制华为推送 ID"
                     android:textColor="#000000" />
 
@@ -174,7 +179,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:gravity="center"
-            android:text="@string/hello"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"

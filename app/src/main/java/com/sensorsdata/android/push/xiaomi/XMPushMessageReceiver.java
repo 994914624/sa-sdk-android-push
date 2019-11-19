@@ -17,6 +17,8 @@ import com.xiaomi.mipush.sdk.MiPushCommandMessage;
 import com.xiaomi.mipush.sdk.MiPushMessage;
 import com.xiaomi.mipush.sdk.PushMessageReceiver;
 
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -42,16 +44,25 @@ public class XMPushMessageReceiver extends PushMessageReceiver {
     }
 
     /**
-     * onNotificationMessageClicked 方法用来接收服务器向客户端发送的通知消息，这个回调方法会在用户手动点击通知后触发。
+     * onNotificationMessageClicked 方法
+     * 用来接收服务器向客户端发送的通知消息，这个回调方法会在用户手动点击通知后触发。
+     *
+     * (测试发现，打开 App、打开 URL 不会回调此接口。且打开 URL 会直接跳到外部浏览器！！！)
      */
     @Override
     public void onNotificationMessageClicked(Context context, MiPushMessage message) {
         if (context == null || message == null) return;
         SFLogger.d(TAG, "onNotificationMessageClicked is called. " + message.toString());
         String log = context.getString(R.string.click_notification_message, message.getContent());
-        SFUtils.sendBroadcast(context.getApplicationContext(), SFConstant.PUSH_CONTENT, log);
+        //SFUtils.sendBroadcast(context.getApplicationContext(), SFConstant.PUSH_CONTENT, log);
         // 埋点 "App 打开推送消息" 事件
-        ToolBox.trackAppOpenNotification(message.getExtra(), message.getTitle(), message.getDescription());
+        //ToolBox.trackAppOpenNotification(message.getExtra(), message.getTitle(), message.getDescription());
+        try {
+            String sf_data = new JSONObject(message.getExtra()).optString("sf_data");
+            ToolBox.handlePush(message.getTitle(),message.getDescription(),sf_data,context);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

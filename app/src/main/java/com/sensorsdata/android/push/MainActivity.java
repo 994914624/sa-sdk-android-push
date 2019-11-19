@@ -8,11 +8,14 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -57,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 switch (type) {
                     case SFConstant.PUSH_CONTENT:
                         // 推送内容的展示
-                        tv_push_content.setText(message);
+                        //tv_push_content.setText(message);
                         break;
                     case SFConstant.PUSH_ID_XMPUSH:
                         // 小米推送初始化最慢！！！，第一次没权限会初始化失败。。。
@@ -75,6 +78,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        Window win = getWindow();
+//        win.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED //锁屏状态下显示
+//                | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD //解锁
+//                | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON //保持屏幕长亮
+//                | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON); //打开屏幕
+
         setContentView(R.layout.activity_main);
         ToolBox.requestPermission(this);
         PushAgent.getInstance(this).onAppStart();
@@ -108,6 +117,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.ll_main_um).setOnClickListener(this);
         findViewById(R.id.ll_main_xm).setOnClickListener(this);
         findViewById(R.id.ll_main_hw).setOnClickListener(this);
+        TextView tv_jpush_tip = findViewById(R.id.tv_jpush_tip);
+        TextView tv_getui_tip = findViewById(R.id.tv_getui_tip);
+        TextView tv_umeng_tip = findViewById(R.id.tv_umeng_tip);
+        TextView tv_xiaomi_tip = findViewById(R.id.tv_xiaomi_tip);
+        TextView tv_huawei_tip = findViewById(R.id.tv_huawei_tip);
+        tv_jpush_tip.setText(Html.fromHtml("点击可复制 "+"<font color=\"#FF4081\">"+"<b>极光</b>"+"</font>"+" 推送 ID"));
+        tv_getui_tip.setText(Html.fromHtml("点击可复制 "+"<font color=\"#FF4081\">"+"<b>个推</b>"+"</font>"+" 推送 ID"));
+        tv_umeng_tip.setText(Html.fromHtml("点击可复制 "+"<font color=\"#FF4081\">"+"<b>友盟</b>"+"</font>"+" 推送 ID"));
+        tv_xiaomi_tip.setText(Html.fromHtml("点击可复制 "+"<font color=\"#FF4081\">"+"<b>小米</b>"+"</font>"+" 推送 ID"));
+        tv_huawei_tip.setText(Html.fromHtml("点击可复制 "+"<font color=\"#FF4081\">"+"<b>华为</b>"+"</font>"+" 推送 ID"));
         // run text
         runText = findViewById(R.id.tv_main_run_text);
         runText.setText(String.format("当前数据接收地址：%s", ToolBox.getServerUrl()));
@@ -195,17 +214,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void refreshDisplay(Context context) {
         setText(textView_jpush, JPushInterface.getRegistrationID(context));
-        setText(textView_xiaomi, MiPushClient.getRegId(context));
+        setText(textView_xiaomi, String.format("android_%s", MiPushClient.getRegId(context)));
         setText(textView_getui, PushManager.getInstance().getClientid(context));
         setText(textView_umeng, PushAgent.getInstance(context).getRegistrationId());
         setText(textView_huawei, ToolBox.HUAWEI_PUSH_ID);
     }
 
     private void setText(TextView textView, String pushId) {
-        if (!TextUtils.isEmpty(pushId)) {
+        if (!TextUtils.isEmpty(pushId)&& !"android_null".equals(pushId)) {
             //  "推送 ID"
             textView.setText(pushId);
         } else {
+            if(textView.getId() == R.id.tv_huawei){
+                textView.setText("手机内，需要 \"华为移动服务\" 3.0.1.303 以上版本！");
+                return;
+            }
             textView.setText("初始化失败，请杀掉 App 重新打开！！！\n\n如果重新打开后，还显示此文字，请联系 @杨站昆");
         }
     }

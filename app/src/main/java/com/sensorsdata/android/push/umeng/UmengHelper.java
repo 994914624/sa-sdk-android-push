@@ -15,6 +15,8 @@ import com.umeng.message.UmengMessageHandler;
 import com.umeng.message.UmengNotificationClickHandler;
 import com.umeng.message.entity.UMessage;
 
+import org.json.JSONObject;
+
 import java.util.Map;
 
 public class UmengHelper {
@@ -34,36 +36,73 @@ public class UmengHelper {
             @Override
             public void launchApp(Context context, UMessage msg) {
                 super.launchApp(context, msg);
-                SFLogger.d(TAG, "launchApp");
+                SFLogger.d(TAG, "launchApp："+msg.custom +"||||"+ msg.extra);
+                try {
+                    String sf_data ="";
+                    if(msg.extra !=null){
+                        sf_data = new JSONObject(msg.extra).optString("sf_data");
+                    }
+                    ToolBox.handlePush(msg.title,msg.text,sf_data,context);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 handleUmengMessage(context, msg);
             }
             @Override
             public void openUrl(Context context, UMessage msg) {
                 super.openUrl(context, msg);
-                SFLogger.d(TAG, "openUrl");
+                SFLogger.d(TAG, "openUrl："+msg.custom +"||||"+  msg.extra);
+                try {
+                    String sf_data ="";
+                    if(msg.extra !=null){
+                        sf_data = new JSONObject(msg.extra).optString("sf_data");
+                    }
+                    ToolBox.handlePush(msg.title,msg.text,sf_data,context);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 handleUmengMessage(context, msg);
             }
             @Override
             public void openActivity(Context context, UMessage msg) {
                 super.openActivity(context, msg);
-                SFLogger.d(TAG, "openActivity");
+                SFLogger.d(TAG, "openActivity："+msg.custom +"||||"+  msg.extra);
+                try {
+                    String sf_data ="";
+                    if(msg.extra !=null){
+                        sf_data = new JSONObject(msg.extra).optString("sf_data");
+                    }
+                    ToolBox.handlePush(msg.title,msg.text,sf_data,context);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 handleUmengMessage(context, msg);
             }
 
             @Override
             public void dealWithCustomAction(Context context, UMessage msg) {
                 super.dealWithCustomAction(context, msg);
-                SFLogger.d(TAG, "dealWithCustomAction");
+                SFLogger.d(TAG, "dealWithCustomAction："+msg.custom +"||||"+  msg.extra);
                 if(context ==null || msg ==null)return;
-                try{
-                    //handleUmengMessage(context, msg);
-                    String pushContent = String.format("消息标题：%s \n\n消息内容：%s \n\nmsg.extra：%s \n\nmsg.custom：%s", msg.title, msg.text, msg.extra.toString(), msg.custom);
-                    SFUtils.sendBroadcast(context.getApplicationContext(), SFConstant.PUSH_CONTENT, pushContent);
-                }catch (Exception e){
+//                try{
+//                    //handleUmengMessage(context, msg);
+//                    String pushContent = String.format("消息标题：%s \n\n消息内容：%s \n\nmsg.extra：%s \n\nmsg.custom：%s", msg.title, msg.text, msg.extra.toString(), msg.custom);
+//                    SFUtils.sendBroadcast(context.getApplicationContext(), SFConstant.PUSH_CONTENT, pushContent);
+//                }catch (Exception e){
+//                    e.printStackTrace();
+//                }
+//                //TODO 埋点 App 打开推送消息 事件
+//                ToolBox.trackAppOpenNotification(msg.extra, msg.title, msg.text);
+
+                try {
+                    String sf_data ="";
+                    if(msg.extra !=null){
+                         sf_data = new JSONObject(msg.extra).optString("sf_data");
+                    }
+                    ToolBox.handlePush(msg.title,msg.text,sf_data,context);
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-                //TODO 埋点 App 打开推送消息 事件
-                ToolBox.trackAppOpenNotification(msg.extra, msg.title, msg.text);
             }
         };
         pushAgent.setNotificationClickHandler(notificationClickHandler);
