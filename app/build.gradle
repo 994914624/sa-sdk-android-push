@@ -11,13 +11,17 @@ android {
         applicationId "com.sensorsdata.android.push"
         minSdkVersion 17
         targetSdkVersion 29
-        versionCode 5
-        versionName "1.0.5"
+        versionCode 7
+        versionName "1.0.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
                 GETUI_APP_ID : "APP_ID",
                 GETUI_APP_KEY : "APP_KEY",
-                GETUI_APP_SECRET : "APP_SECRET"
+                GETUI_APP_SECRET : "APP_SECRET",
+
+                XG_ACCESS_ID:"2100336784",
+                XG_ACCESS_KEY : "ATW647YR9P6G",
+
         ]
     }
 
@@ -43,15 +47,17 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
     //添加 Sensors Analytics SDK 依赖
-    implementation 'com.sensorsdata.analytics.android:SensorsAnalyticsSDK:3.2.7'
-
+//    implementation 'com.sensorsdata.analytics.android:SensorsAnalyticsSDK:3.2.7'
+    api(name: 'SensorsAnalyticsSDK-3.2.9', ext: 'aar')
     // 集成友盟
     //PushSDK必须依赖基础组件库，所以需要加入对应依赖
     implementation 'com.umeng.umsdk:common:1.5.4'
@@ -59,18 +65,40 @@ dependencies {
     implementation 'com.umeng.umsdk:utdid:1.1.5.3'
     //PushSDK
     implementation 'com.umeng.umsdk:push:6.0.1'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
-    implementation 'com.google.android.material:material:1.0.0'
     //zxing
     implementation('com.journeyapps:zxing-android-embedded:3.6.0') { transitive = false }
     implementation 'com.google.zxing:core:3.3.0'
     // 华为推送
     implementation 'com.huawei.agconnect:agconnect-core:1.0.0.300'
     implementation 'com.huawei.hms:push:3.0.0.303'
-    //
+    // json 展示的 UI
     implementation 'com.yuyh.json:jsonviewer:1.0.6'
+    //    //华为Push通道
+    //    implementation 'com.umeng.umsdk:huawei-basetb:2.6.3.305'
+    //    implementation 'com.umeng.umsdk:huawei-pushtb:2.6.3.305'
+    //    implementation 'com.umeng.umsdk:huawei-umengaccs:1.2.1'
+    //完整的信鸽依赖四个都必须有，如果发生依赖冲突请根据对应的依赖版本号选择高版本的依赖。（使用jcenter自动接入请确认libs中没有信鸽的相关jar包）
+    implementation 'com.tencent.xinge:xinge:3.2.7-Release'
+    //jg包
+    implementation 'com.tencent.jg:jg:1.1'
+    //wup包
+    implementation 'com.tencent.wup:wup:1.0.0.E-Release'
+    //mid包
+    implementation 'com.tencent.mid:mid:4.0.6-release'
+
+    // OPPO 推送
+    implementation files('libs/mcssdk-2.0.2.jar')
+    // 魅族 Flyme 推送
+   implementation 'com.meizu.flyme.internet:push-internal:3.8.6'
+
 }
 
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+    mavenCentral()
+}
 
 // 华为推送 Add to the bottom of the file
 apply plugin: 'com.huawei.agconnect'

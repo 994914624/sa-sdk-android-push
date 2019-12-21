@@ -3,12 +3,10 @@ package com.sensorsdata.android.push;
 import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
-import android.text.TextUtils;
 import android.util.Log;
 
-import com.huawei.agconnect.config.AGConnectServicesConfig;
-import com.huawei.agconnect.config.LazyInputStream;
-import com.huawei.hms.aaid.HmsInstanceId;
+import com.heytap.mcssdk.callback.PushCallback;
+import com.heytap.mcssdk.mode.SubscribeResult;
 import com.igexin.sdk.PushManager;
 import com.sensorsdata.analytics.android.sdk.SAConfigOptions;
 import com.sensorsdata.analytics.android.sdk.SensorsAnalyticsAutoTrackEventType;
@@ -17,17 +15,20 @@ import com.sensorsdata.android.push.getui.GeTuiService;
 import com.sensorsdata.android.push.getui.RequiredPushService;
 import com.sensorsdata.android.push.umeng.UmengHelper;
 import com.sensorsdata.android.push.yzk.ToolBox;
+import com.tencent.android.tpush.XGIOperateCallback;
+import com.tencent.android.tpush.XGPushConfig;
+import com.tencent.android.tpush.XGPushManager;
 import com.umeng.commonsdk.UMConfigure;
 import com.umeng.message.IUmengRegisterCallback;
 import com.umeng.message.PushAgent;
 import com.xiaomi.mipush.sdk.MiPushClient;
 
-import java.io.InputStream;
+
 import java.util.List;
 
 import cn.jpush.android.api.JPushInterface;
 
-public class PushApplication extends Application {
+public class App extends Application {
     /**
      * Sensors Analytics 采集数据的地址
      */
@@ -37,12 +38,130 @@ public class PushApplication extends Application {
     public void onCreate() {
         super.onCreate();
         SFLogger.setIsDebug(true);
+        initUmengPush();
         initSensorsDataAPI();
         initJPush();
         initGetTuiPush();
-        initUmengPush();
         initXiaoMi();
+        initXinGe();
+        initOppo();
+        initMeizu();
         ToolBox.getHuaWeiPushToken(this);
+    }
+
+    /**
+     * 魅族有2种推送：①Flyme 推送、②集成推送
+     * 魅族（需要魅族的 "推送服务"）
+     * 此处是：Flyme 推送 http://push.meizu.com/
+     *
+     * 集成推送 http://mzups.meizu.com/
+     */
+    private void initMeizu() {
+        com.meizu.cloud.pushsdk.PushManager.register(this, "126314", "373ebb77df37432babadc35f5d41ecb9");
+    }
+
+    /**
+     * oppo
+     */
+    private void initOppo() {
+        try {
+            if (com.heytap.mcssdk.PushManager.isSupportPush(this.getApplicationContext())) {
+                com.heytap.mcssdk.PushManager.getInstance().register(this.getApplicationContext(), "f0112b72c1cb4a88b563601d2668623e", "a93031e4428a4b23a1c106ed0b293ac5", new PushCallback() {
+                    @Override
+                    public void onRegister(int i, String s) {
+                        Log.i("OPPO","推送 ID："+s);
+                    }
+
+                    @Override
+                    public void onUnRegister(int i) {
+
+                    }
+
+                    @Override
+                    public void onSetPushTime(int i, String s) {
+
+                    }
+
+                    @Override
+                    public void onGetPushStatus(int i, int i1) {
+
+                    }
+
+                    @Override
+                    public void onGetNotificationStatus(int i, int i1) {
+
+                    }
+
+                    @Override
+                    public void onGetAliases(int i, List<SubscribeResult> list) {
+
+                    }
+
+                    @Override
+                    public void onSetAliases(int i, List<SubscribeResult> list) {
+
+                    }
+
+                    @Override
+                    public void onUnsetAliases(int i, List<SubscribeResult> list) {
+
+                    }
+
+                    @Override
+                    public void onSetUserAccounts(int i, List<SubscribeResult> list) {
+
+                    }
+
+                    @Override
+                    public void onUnsetUserAccounts(int i, List<SubscribeResult> list) {
+
+                    }
+
+                    @Override
+                    public void onGetUserAccounts(int i, List<SubscribeResult> list) {
+
+                    }
+
+                    @Override
+                    public void onSetTags(int i, List<SubscribeResult> list) {
+
+                    }
+
+                    @Override
+                    public void onUnsetTags(int i, List<SubscribeResult> list) {
+
+                    }
+
+                    @Override
+                    public void onGetTags(int i, List<SubscribeResult> list) {
+
+                    }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 信鸽
+     */
+    private void initXinGe() {
+        XGPushConfig.enableDebug(this, true);
+        // 多进程初始化，这里会回调多次，发现注释掉 registerPush ，receiver 中也不回调了。。。
+        XGPushManager.registerPush(this, new XGIOperateCallback() {
+
+            @Override
+            public void onSuccess(Object token, int i) {
+                // token在设备卸载重装的时候有可能会变
+                Log.d("信鸽", "注册成功，设备token为：" + token);
+            }
+
+            @Override
+            public void onFail(Object o, int i, String s) {
+                Log.d("信鸽", "注册失败：" + i + "  ," + s);
+            }
+        });
     }
 
     /**
@@ -116,7 +235,7 @@ public class PushApplication extends Application {
                  * deviceToken是【友盟+】消息推送生成的用于标识设备的id，长度为44位，不能定制和修改。
                  * 同一台设备上不同应用对应的deviceToken不一样。获取deviceToken的值后，可进行消息推送测试！
                  */
-                SFLogger.d("Umeng","注册成功：deviceToken：-------->  " + deviceToken);
+                SFLogger.d("Umeng", "注册成功：deviceToken：-------->  " + deviceToken);
                 SFUtils.profilePushId(getApplicationContext(), SFConstant.PUSH_ID_UMENG, deviceToken);
                 SFUtils.savePushId(getApplicationContext(), SFConstant.PUSH_ID_UMENG, deviceToken);
                 new Thread(new Runnable() {
@@ -126,9 +245,10 @@ public class PushApplication extends Application {
                     }
                 }).start();
             }
+
             @Override
             public void onFailure(String s, String s1) {
-                SFLogger.d("Umeng","注册失败：-------->  " + "s:" + s + ",s1:" + s1);
+                SFLogger.d("Umeng", "注册失败：-------->  " + "s:" + s + ",s1:" + s1);
                 SFUtils.sendBroadcast(getApplicationContext(), SFConstant.PUSH_ID_UMENG, "注册失败");
             }
         });
@@ -138,6 +258,7 @@ public class PushApplication extends Application {
     private static final String APP_ID = "2882303761518098384";
     // user your appid the key.
     private static final String APP_KEY = "5181809853384";
+
     private void initXiaoMi() {
         // 注册push服务，注册成功后会向DemoMessageReceiver发送广播
         // 可以从DemoMessageReceiver的onCommandResult方法中MiPushCommandMessage对象参数中获取注册信息
@@ -151,12 +272,15 @@ public class PushApplication extends Application {
 
     private boolean shouldInit() {
         ActivityManager am = ((ActivityManager) getSystemService(Context.ACTIVITY_SERVICE));
-        List<ActivityManager.RunningAppProcessInfo> processInfos = am.getRunningAppProcesses();
-        String mainProcessName = getPackageName();
-        int myPid = android.os.Process.myPid();
-        for (ActivityManager.RunningAppProcessInfo info : processInfos) {
-            if (info.pid == myPid && mainProcessName.equals(info.processName)) {
-                return true;
+        List<ActivityManager.RunningAppProcessInfo> processInfos = null;
+        if (am != null) {
+            processInfos = am.getRunningAppProcesses();
+            String mainProcessName = getPackageName();
+            int myPid = android.os.Process.myPid();
+            for (ActivityManager.RunningAppProcessInfo info : processInfos) {
+                if (info.pid == myPid && mainProcessName.equals(info.processName)) {
+                    return true;
+                }
             }
         }
         return false;

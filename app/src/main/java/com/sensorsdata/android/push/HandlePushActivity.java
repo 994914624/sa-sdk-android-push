@@ -32,12 +32,13 @@ public class HandlePushActivity extends AppCompatActivity {
     private TextView tvCustom;
     private JsonRecyclerView rcSfData;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
         Log.i(TAG, "onCreate");
-        initActionBar();
+        //initActionBar();
         iniView();
         handlePushIntent();
     }
@@ -48,6 +49,7 @@ public class HandlePushActivity extends AppCompatActivity {
         tvCustom = findViewById(R.id.push_custom);
         rcSfData = findViewById(R.id.push_sf_data);
     }
+
 
     private void initActionBar() {
         ActionBar mActionBar = getSupportActionBar();
@@ -70,6 +72,11 @@ public class HandlePushActivity extends AppCompatActivity {
         if (intent != null) {
             String intentUri = intent.toUri(Intent.URI_INTENT_SCHEME);
             Log.i(TAG, "intentUri：" + intentUri);
+            Log.i(TAG, "intent：" + intent.toString());
+
+            if(intent.getExtras()!=null){
+                Log.i(TAG, "intent.getExtras：" + intent.getExtras().toString());
+            }
 
             // 推送 title content
             String title = intent.getStringExtra("title");
@@ -99,7 +106,5 @@ public class HandlePushActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-
-
     }
 }

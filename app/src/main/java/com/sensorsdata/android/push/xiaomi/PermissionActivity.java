@@ -7,7 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.sensorsdata.android.push.PushApplication;
+import com.sensorsdata.android.push.App;
 
 public class PermissionActivity extends Activity {
     private static final int PERMISSION_REQUEST = 1;
@@ -43,7 +43,7 @@ public class PermissionActivity extends Activity {
 
             if (granted) {
                 Log.w("PermissionActivity", "Permissions granted:");
-                PushApplication.reInitPush(this);
+                App.reInitPush(this);
             }
             finish();
         }

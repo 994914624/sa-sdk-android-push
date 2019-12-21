@@ -1,10 +1,13 @@
 package com.sensorsdata.android.push;
 
 import android.annotation.TargetApi;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,6 +30,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.igexin.sdk.PushManager;
 import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
 import com.sensorsdata.android.push.yzk.ToolBox;
+import com.tencent.android.tpush.XGPushConfig;
 import com.umeng.message.PushAgent;
 import com.xiaomi.mipush.sdk.MiPushClient;
 
@@ -45,6 +49,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView textView_umeng;
     private TextView textView_xiaomi;
     private TextView textView_huawei;
+    private TextView textView_xinge;
+    private TextView textView_oppo;
+    private TextView textView_meizu;
     private TextView runText;
     private EditText editText;
 
@@ -78,16 +85,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        Window win = getWindow();
-//        win.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED //锁屏状态下显示
-//                | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD //解锁
-//                | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON //保持屏幕长亮
-//                | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON); //打开屏幕
-
         setContentView(R.layout.activity_main);
         ToolBox.requestPermission(this);
         PushAgent.getInstance(this).onAppStart();
         initView();
+        createNotificationChannel();
         // 注册广播，接收推送展示的数据
         registerReceiver(sfResultReceiver, new IntentFilter(getPackageName()));
         // 上报 推送 ID
@@ -104,6 +106,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }, 5000);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        oppoRequestNotificationPermission();
+    }
+
+    private void oppoRequestNotificationPermission() {
+        try {
+            if (com.heytap.mcssdk.PushManager.isSupportPush(this.getApplicationContext())) {
+                // 请求权限
+                com.heytap.mcssdk.PushManager.getInstance().requestNotificationPermission();
+//                com.heytap.mcssdk.PushManager.getInstance().openNotificationSettings();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void initView() {
         tv_push_content = findViewById(R.id.tv_test);
@@ -112,21 +132,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         textView_umeng = findViewById(R.id.tv_umeng);
         textView_xiaomi = findViewById(R.id.tv_xiaomi);
         textView_huawei = findViewById(R.id.tv_huawei);
+        textView_xinge = findViewById(R.id.tv_xinge);
+        textView_oppo = findViewById(R.id.tv_oppo);
+        textView_meizu = findViewById(R.id.tv_meizu);
         findViewById(R.id.ll_main_jg).setOnClickListener(this);
         findViewById(R.id.ll_main_gt).setOnClickListener(this);
         findViewById(R.id.ll_main_um).setOnClickListener(this);
         findViewById(R.id.ll_main_xm).setOnClickListener(this);
         findViewById(R.id.ll_main_hw).setOnClickListener(this);
+        findViewById(R.id.ll_main_xg).setOnClickListener(this);
+        findViewById(R.id.ll_main_oppo).setOnClickListener(this);
+        findViewById(R.id.ll_main_meizu).setOnClickListener(this);
         TextView tv_jpush_tip = findViewById(R.id.tv_jpush_tip);
         TextView tv_getui_tip = findViewById(R.id.tv_getui_tip);
         TextView tv_umeng_tip = findViewById(R.id.tv_umeng_tip);
         TextView tv_xiaomi_tip = findViewById(R.id.tv_xiaomi_tip);
         TextView tv_huawei_tip = findViewById(R.id.tv_huawei_tip);
-        tv_jpush_tip.setText(Html.fromHtml("点击可复制 "+"<font color=\"#FF4081\">"+"<b>极光</b>"+"</font>"+" 推送 ID"));
-        tv_getui_tip.setText(Html.fromHtml("点击可复制 "+"<font color=\"#FF4081\">"+"<b>个推</b>"+"</font>"+" 推送 ID"));
-        tv_umeng_tip.setText(Html.fromHtml("点击可复制 "+"<font color=\"#FF4081\">"+"<b>友盟</b>"+"</font>"+" 推送 ID"));
-        tv_xiaomi_tip.setText(Html.fromHtml("点击可复制 "+"<font color=\"#FF4081\">"+"<b>小米</b>"+"</font>"+" 推送 ID"));
-        tv_huawei_tip.setText(Html.fromHtml("点击可复制 "+"<font color=\"#FF4081\">"+"<b>华为</b>"+"</font>"+" 推送 ID"));
+        TextView tv_xinge_tip = findViewById(R.id.tv_xinge_tip);
+        TextView tv_oppo_tip = findViewById(R.id.tv_oppo_tip);
+        TextView tv_meizu_tip = findViewById(R.id.tv_meizu_tip);
+        tv_jpush_tip.setText(Html.fromHtml("点击可复制 " + "<font color=\"#FF4081\">" + "<b>极光</b>" + "</font>" + " 推送 ID"));
+        tv_getui_tip.setText(Html.fromHtml("点击可复制 " + "<font color=\"#FF4081\">" + "<b>个推</b>" + "</font>" + " 推送 ID"));
+        tv_umeng_tip.setText(Html.fromHtml("点击可复制 " + "<font color=\"#FF4081\">" + "<b>友盟</b>" + "</font>" + " 推送 ID"));
+        tv_xiaomi_tip.setText(Html.fromHtml("点击可复制 " + "<font color=\"#FF4081\">" + "<b>小米</b>" + "</font>" + " 推送 ID"));
+        tv_huawei_tip.setText(Html.fromHtml("点击可复制 " + "<font color=\"#FF4081\">" + "<b>华为</b>" + "</font>" + " 推送 ID"));
+        tv_xinge_tip.setText(Html.fromHtml("点击可复制 " + "<font color=\"#FF4081\">" + "<b>信鸽</b>" + "</font>" + " 推送 ID"));
+        tv_oppo_tip.setText(Html.fromHtml("点击可复制 " + "<font color=\"#FF4081\">" + "<b>OPPO</b>" + "</font>" + " 推送 ID"));
+        tv_meizu_tip.setText(Html.fromHtml("点击可复制 " + "<font color=\"#FF4081\">" + "<b>魅族</b>" + "</font>" + " 推送 ID"));
         // run text
         runText = findViewById(R.id.tv_main_run_text);
         runText.setText(String.format("当前数据接收地址：%s", ToolBox.getServerUrl()));
@@ -202,6 +234,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.ll_main_hw:
                 copyPushId = textView_huawei.getText() + "";
                 break;
+            case R.id.ll_main_xg:
+                copyPushId = textView_xinge.getText() + "";
+                break;
+            case R.id.ll_main_oppo:
+                copyPushId = textView_oppo.getText() + "";
+                break;
+            case R.id.ll_main_meizu:
+                copyPushId = textView_meizu.getText() + "";
+                break;
             default:
                 break;
         }
@@ -218,15 +259,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setText(textView_getui, PushManager.getInstance().getClientid(context));
         setText(textView_umeng, PushAgent.getInstance(context).getRegistrationId());
         setText(textView_huawei, ToolBox.HUAWEI_PUSH_ID);
+        setText(textView_xinge, XGPushConfig.getToken(this));
+
+        if (com.heytap.mcssdk.PushManager.isSupportPush(this.getApplicationContext())) {
+            setText(textView_oppo, com.heytap.mcssdk.PushManager.getInstance().getRegisterID());
+        } else {
+            setText(textView_oppo,"请使用 OPPO 手机！(或一加/realme)");
+        }
+        setText(textView_meizu, com.meizu.cloud.pushsdk.PushManager.getPushId(context));
     }
 
     private void setText(TextView textView, String pushId) {
-        if (!TextUtils.isEmpty(pushId)&& !"android_null".equals(pushId)) {
+        if (!TextUtils.isEmpty(pushId) && !"android_null".equals(pushId)) {
             //  "推送 ID"
             textView.setText(pushId);
         } else {
-            if(textView.getId() == R.id.tv_huawei){
+            if (textView.getId() == R.id.tv_huawei) {
                 textView.setText("手机内，需要 \"华为移动服务\" 3.0.1.303 以上版本！");
+                return;
+            } else if (textView.getId() == R.id.tv_meizu) {
+                textView.setText("请使用魅族手机!");
                 return;
             }
             textView.setText("初始化失败，请杀掉 App 重新打开！！！\n\n如果重新打开后，还显示此文字，请联系 @杨站昆");
@@ -245,5 +297,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(sfResultReceiver);
+    }
+
+    /**
+     * OPPO 推送，开发者必须自己创建通知通道
+     */
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence channelName = "通道001";
+            NotificationChannel channel = new NotificationChannel("001", channelName, NotificationManager.IMPORTANCE_HIGH);
+            channel.setDescription("通道001的描述");
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
     }
 }

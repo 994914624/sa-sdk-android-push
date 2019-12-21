@@ -27,6 +27,7 @@ import com.igexin.sdk.PushManager;
 import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
 import com.sensorsdata.android.push.HandlePushActivity;
 import com.sensorsdata.android.push.R;
+import com.tencent.android.tpush.XGPushConfig;
 import com.umeng.message.PushAgent;
 import com.xiaomi.mipush.sdk.MiPushClient;
 
@@ -127,6 +128,7 @@ public class ToolBox {
      */
     public static boolean openDebugModeOrHeatMap(String result, Activity activity) {
         try {
+            Log.e("aaaaaaa","--- result --> :"+result);
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             final Uri uri = Uri.parse(result);
@@ -134,6 +136,7 @@ public class ToolBox {
             // debug 模式
             if (keys.contains("connectType") && "debugmode".equals(uri.getQueryParameter("connectType"))) {
                 String intentData = String.format("%s://debugmode?info_id=%s", uri.getQueryParameter("protocal"), uri.getQueryParameter("info_id"));
+                Log.e("aaaaaaa","-- intentData ---> :"+intentData);
                 intent.setData(Uri.parse(intentData));
                 // 打开指定的 App
                 activity.startActivity(intent);
@@ -205,6 +208,8 @@ public class ToolBox {
             String xmId = MiPushClient.getRegId(context);
             String gtId = PushManager.getInstance().getClientid(context);
             String umId = PushAgent.getInstance(context).getRegistrationId();
+            String xgId = XGPushConfig.getToken(context);
+            String mzId = com.meizu.cloud.pushsdk.PushManager.getPushId(context);
             if (!TextUtils.isEmpty(jgId)) {
                 // 极光 "推送 ID"
                 properties.put("jiguang_id", jgId);
@@ -224,6 +229,22 @@ public class ToolBox {
             if (!TextUtils.isEmpty(HUAWEI_PUSH_ID)) {
                 // 华为 "推送 ID"
                 properties.put("huawei_id", HUAWEI_PUSH_ID);
+            }
+            if (!TextUtils.isEmpty(xgId)) {
+                // 信鸽 "推送 ID"
+                properties.put("xinge_id", xgId);
+            }
+            if (com.heytap.mcssdk.PushManager.isSupportPush(context.getApplicationContext())) {
+                String opId = com.heytap.mcssdk.PushManager.getInstance().getRegisterID();
+                if (!TextUtils.isEmpty(opId)) {
+                    // OPPO "推送 ID"
+                    properties.put("oppo_id", opId);
+                }
+            }
+
+            if (!TextUtils.isEmpty(mzId)) {
+                // 魅族 "推送 ID"
+                properties.put("meizu_id", mzId);
             }
             SensorsDataAPI.sharedInstance().profileSet(properties);
             SensorsDataAPI.sharedInstance().flush();
@@ -250,10 +271,12 @@ public class ToolBox {
             properties.put("$sf_msg_content", notificationContent);
             try {
                 String sfData = null;
-                if (notificationExtras instanceof String) {
-                    sfData = new JSONObject((String) notificationExtras).optString("sf_data");
-                } else if (notificationExtras instanceof Map) {
-                    sfData = new JSONObject((Map) notificationExtras).optString("sf_data");
+                if (notificationExtras != null) {
+                    if (notificationExtras instanceof String) {
+                        sfData = new JSONObject((String) notificationExtras).optString("sf_data");
+                    } else if (notificationExtras instanceof Map) {
+                        sfData = new JSONObject((Map) notificationExtras).optString("sf_data");
+                    }
                 }
                 if (!TextUtils.isEmpty(sfData)) {
                     JSONObject sfJson = new JSONObject(sfData);

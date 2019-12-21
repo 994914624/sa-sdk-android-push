@@ -102,7 +102,7 @@ public class MyJPushMessageReceiver extends JPushMessageReceiver {
 
     @Override
     public void onNotifyMessageArrived(Context context, NotificationMessage notificationMessage) {
-        SFLogger.d(TAG, "onNotifyMessageArrived");
+        SFLogger.d(TAG, "onNotifyMessageArrived: "+notificationMessage.notificationExtras);
         super.onNotifyMessageArrived(context, notificationMessage);
     }
 
