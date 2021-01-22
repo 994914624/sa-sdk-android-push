@@ -56,8 +56,8 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation 'com.google.android.material:material:1.0.0'
     //添加 Sensors Analytics SDK 依赖
-//    implementation 'com.sensorsdata.analytics.android:SensorsAnalyticsSDK:3.2.7'
-    api(name: 'SensorsAnalyticsSDK-3.2.9', ext: 'aar')
+    implementation 'com.sensorsdata.analytics.android:SensorsAnalyticsSDK:4.4.9'
+//    api(name: 'SensorsAnalyticsSDK-3.2.9', ext: 'aar')
     // 集成友盟
     //PushSDK必须依赖基础组件库，所以需要加入对应依赖
     implementation 'com.umeng.umsdk:common:1.5.4'

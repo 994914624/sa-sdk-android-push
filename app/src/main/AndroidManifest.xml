@@ -137,10 +137,10 @@
                 <data
                     android:host="debugmode"
                     android:scheme="sa9930c860" />
-                <!-- zhenjie -->
+                <!-- lichunjie -->
                 <data
                     android:host="debugmode"
-                    android:scheme="sa953d961b" />
+                    android:scheme="sa972f0d4a" />
             </intent-filter>
         </activity> <!-- 极光推送相关配置 -->
         <!-- Rich push 核心功能 since 2.0.6 -->

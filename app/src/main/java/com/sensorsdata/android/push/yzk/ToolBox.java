@@ -135,13 +135,22 @@ public class ToolBox {
             Set<String> keys = uri.getQueryParameterNames();
             // debug 模式
             if (keys.contains("connectType") && "debugmode".equals(uri.getQueryParameter("connectType"))) {
-                String intentData = String.format("%s://debugmode?info_id=%s", uri.getQueryParameter("protocal"), uri.getQueryParameter("info_id"));
+                String intentData = String.format("%s://debugmode?info_id=%s&sf_push_distinct_id=%s&project=%s", uri.getQueryParameter("protocal"), uri.getQueryParameter("info_id"),uri.getQueryParameter("sf_push_distinct_id"),uri.getQueryParameter("project"));
                 Log.e("aaaaaaa","-- intentData ---> :"+intentData);
                 intent.setData(Uri.parse(intentData));
-                // 打开指定的 App
-                activity.startActivity(intent);
-                activity.finish();
-                SensorsDataAPI.sharedInstance().track("ScanBarDebug");
+
+                try {
+                    // 打开指定的 App
+                    activity.startActivity(intent);
+                    activity.finish();
+                    SensorsDataAPI.sharedInstance().track("ScanBarDebug");
+                } catch (Exception e){
+                    e.printStackTrace();
+                    Toast.makeText(activity.getApplicationContext(),"scheme 不正确!!! 固定的 scheme 为：sf20191010nb",Toast.LENGTH_LONG).show();
+                    Log.e("aaaaaaa","-- scheme 不正确 ！！！！ ---> :");
+                    return true;
+                }
+
                 return true;
             }
             // 可视化埋点、点击图

@@ -11,8 +11,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
 import android.text.Html;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -20,6 +22,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,6 +36,9 @@ import com.sensorsdata.android.push.yzk.ToolBox;
 import com.tencent.android.tpush.XGPushConfig;
 import com.umeng.message.PushAgent;
 import com.xiaomi.mipush.sdk.MiPushClient;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import cn.jpush.android.api.JPushInterface;
 
@@ -82,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     };
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,6 +111,53 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(MainActivity.this, "上报推送 ID", Toast.LENGTH_SHORT).show();
             }
         }, 5000);
+        initXXXTest();
+
+    }
+    EditText name;
+    EditText phone;
+    Button xxx;
+    private void initXXXTest() {
+        name =findViewById(R.id.et_name);
+        name.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                xxx.setText(s.toString()+"测试");
+            }
+        });
+        phone =findViewById(R.id.et_phone);
+        xxx = findViewById(R.id.btn_xxx);
+        xxx.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                JSONObject jsonObject = new JSONObject();
+                if(TextUtils.isEmpty(name.getText())|| TextUtils.isEmpty(phone.getText())){
+                    Toast.makeText(MainActivity.this,"请填写姓名&手机号:"+phone.getText(),Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                try {
+                    jsonObject.put("name",name.getText()+"");
+                    jsonObject.put("phoneNumber",phone.getText()+"");
+                    SensorsDataAPI.sharedInstance().profileSet(jsonObject);
+                    SensorsDataAPI.sharedInstance().track("test");
+                    SensorsDataAPI.sharedInstance().flush();
+                    Toast.makeText(MainActivity.this,"已上报:"+phone.getText(),Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
     }
 
     @Override
